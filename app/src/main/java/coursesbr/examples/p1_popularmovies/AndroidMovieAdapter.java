@@ -7,6 +7,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,8 +47,10 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movie,parent,false);
         }
         ImageView posterView = (ImageView)convertView.findViewById(R.id.movieView);
-        posterView.setImageResource(androidMovie.image);
+        //posterView.setImageResource(androidMovie.image);
+        Picasso.with(getContext()).load(androidMovie.image_url).into(posterView);
 
         return convertView;
     }
+
 }
