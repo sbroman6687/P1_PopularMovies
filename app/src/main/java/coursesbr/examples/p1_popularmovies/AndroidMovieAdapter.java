@@ -47,7 +47,6 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movie,parent,false);
         }
         ImageView posterView = (ImageView)convertView.findViewById(R.id.movieView);
-        //posterView.setImageResource(androidMovie.image);
         Picasso.with(getContext()).load(androidMovie.image_url).into(posterView);
 
         return convertView;

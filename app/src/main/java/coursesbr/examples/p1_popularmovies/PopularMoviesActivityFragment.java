@@ -3,6 +3,7 @@ package coursesbr.examples.p1_popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -34,9 +35,8 @@ import java.util.Arrays;
  */
 public class PopularMoviesActivityFragment extends Fragment {
 
-    private AndroidMovieAdapter movieAdapter;
-    //private ArrayAdapter<String> ListmovieAdapter;
 
+    private AndroidMovieAdapter movieAdapter;
 
     /**
      *
@@ -73,8 +73,6 @@ public class PopularMoviesActivityFragment extends Fragment {
     }
 
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -83,14 +81,6 @@ public class PopularMoviesActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_popular_movies,container,false);
         //movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(androidMovies));
 
-        /**
-         *
-        ListmovieAdapter = new ArrayAdapter<String>(
-                getActivity(),
-                R.layout.grid_item_movie,
-                R.id.movieView,new ArrayList<String>());
-         */
-        //Get a reference to the GridView, and attach this adapter to it.
 
         GridView gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
         gridView.setAdapter(movieAdapter);
@@ -122,6 +112,11 @@ public class PopularMoviesActivityFragment extends Fragment {
     }
 
     public class FetchMoviesTask extends AsyncTask<String,Void,String[]>{
+
+        AndroidMovieAdapter movieAdapter;
+        AndroidMovie[] androidMovies;
+        GridView gridView;
+
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
@@ -162,7 +157,7 @@ public class PopularMoviesActivityFragment extends Fragment {
             }
 
             //adapter here
-            movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(androidMovies));
+            //movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(androidMovies));
 
             return posterPaths;
 
@@ -188,9 +183,12 @@ public class PopularMoviesActivityFragment extends Fragment {
                 //Construct the URL for the Popular Movies query
                 //Possible parameters are available at https://www.themoviedb.org/documentation/api/discover
 
-                String MOVIES_BASE_URL ="http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc";
-                String apiKey = "&api_key" + BuildConfig.OPEN_POPULAR_MOVIES_API_KEY;
-                URL url = new URL(MOVIES_BASE_URL.concat(apiKey));
+                final String MOVIES_BASE_URL ="http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc";
+                final String APIKEY_PARAM = "api_key";
+                Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+                        .appendQueryParameter(APIKEY_PARAM, BuildConfig.OPEN_POPULAR_MOVIES_API_KEY)
+                        .build();
+                URL url = new URL(builtUri.toString());
 
                 //Create the request to themoviedb, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -216,8 +214,8 @@ public class PopularMoviesActivityFragment extends Fragment {
                 }
                 if (buffer.length() == 0) {
                     // Stream was empty.  No point in parsing.
-                    //movieJsonStr = null;
-                    return null;
+                    movieJsonStr = null;
+                    //return null;
                 }
                 movieJsonStr = buffer.toString();
 
@@ -241,31 +239,29 @@ public class PopularMoviesActivityFragment extends Fragment {
                     }
                 }
             }
+
+
             try{
                 return getMovieDataFromJson(movieJsonStr,numMovies);
             }catch (JSONException e){
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
+
                 // This will only happen if there was an error getting or parsing the movies.
 
             return null;
         }
 
-
-
         @Override
         protected void onPostExecute(String[] result) {
 
-            if (result != null){
+            if (result!=null){
                 movieAdapter.clear();
-                for (String moviedataStr  : result){
-
-                     movieAdapter.addAll();
-
-                }
-                //new data is back from the server. yujuuu
+                movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(androidMovies));
+                gridView.setAdapter(movieAdapter);
             }
+
         }
 
     }
