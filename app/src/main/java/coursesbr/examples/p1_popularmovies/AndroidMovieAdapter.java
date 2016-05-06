@@ -1,6 +1,7 @@
 package coursesbr.examples.p1_popularmovies;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
     public AndroidMovieAdapter(Activity context, List<AndroidMovie> androidMovies){
         super(context,0,androidMovies);
     }
+
 
     /**
      * Provides a view for an AdapterView (GridView in this case)
