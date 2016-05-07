@@ -24,12 +24,10 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
      * The context (current context) is used to inflate the layout file, and the list (androidMovies)
      * is the list data to populate into the grid
      */
+    public AndroidMovieAdapter(Activity context, List<AndroidMovie> result){
+        super(context,0,result);
 
-    public AndroidMovieAdapter(Activity context, List<AndroidMovie> androidMovies){
-        super(context,0,androidMovies);
     }
-
-
     /**
      * Provides a view for an AdapterView (GridView in this case)
      * position: The AdapterView position that is requesting a view
@@ -40,7 +38,8 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //1. Gets the AndroidMovie object from the ArrayAdapter at the appropriate position
-        AndroidMovie androidMovie = getItem(position);
+        //AndroidMovie androidMovie = getItem(position);
+        AndroidMovie result = getItem(position);
 
         //2. Adapters recycle views to AdapterViews. If this is a new View Object, then inflate the layout.
         //If not, this view already has the layout inflate from previous call to getView, we just modify the view widgets.
@@ -49,9 +48,8 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movie,parent,false);
         }
         ImageView posterView = (ImageView)convertView.findViewById(R.id.movieView);
-        Picasso.with(getContext()).load(androidMovie.image_url).into(posterView);
+        Picasso.with(getContext()).load(result.image_url).into(posterView);
 
         return convertView;
     }
-
 }

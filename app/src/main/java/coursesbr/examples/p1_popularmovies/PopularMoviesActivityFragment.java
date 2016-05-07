@@ -71,7 +71,6 @@ public class PopularMoviesActivityFragment extends Fragment {
         String popular = prefs.getString(getString(R.string.pref_movies_sort_key), getString(R.string.pref_sort_mostpopular));
         moviesTask.execute(popular);
         //moviesTask.execute();
-
     }
 
     @Override
@@ -84,9 +83,12 @@ public class PopularMoviesActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         //movieAdapter = new AndroidMovieAdapter(getActivity(), new ArrayList<AndroidMovie>());
+        rootView = inflater.inflate(R.layout.fragment_popular_movies,container,false);
+        //gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
 
-        View rootView = inflater.inflate(R.layout.fragment_popular_movies,container,false);
-        GridView gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
+        /**
+         *
+
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -108,6 +110,7 @@ public class PopularMoviesActivityFragment extends Fragment {
 
             }
         });
+         */
 
         return rootView;
     }
@@ -127,7 +130,7 @@ public class PopularMoviesActivityFragment extends Fragment {
             JSONObject movieJson = new JSONObject(movieJsonStr);
             JSONArray movieArray = movieJson.getJSONArray(RESULTS);
 
-            AndroidMovie[] resultStr = new AndroidMovie[20];
+            AndroidMovie[] resultStr = new AndroidMovie[movieArray.length()];
 
             //Extract movie data and build movie objects
 
@@ -242,8 +245,11 @@ public class PopularMoviesActivityFragment extends Fragment {
 
             if (result!=null){
                 try {
+                    //Toast.makeText(getContext(),"Ponemos" + Arrays.asList(result),Toast.LENGTH_LONG).show();
                     movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(result));
+                    GridView gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
                     gridView.setAdapter(movieAdapter);
+
 
                 }catch(NullPointerException e){
                     e.printStackTrace();
@@ -256,5 +262,4 @@ public class PopularMoviesActivityFragment extends Fragment {
         }
 
     }
-
 }
