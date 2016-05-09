@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Movie;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.NetworkOnMainThreadException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -39,14 +40,13 @@ import java.util.List;
  */
 public class PopularMoviesActivityFragment extends Fragment {
 
-    public AndroidMovie[] androidMovies;
+   // public AndroidMovie[] androidMovies;
     public AndroidMovieAdapter movieAdapter;
     public GridView gridView;
     public View rootView;
 
     /**
      *
-
     AndroidMovie[] androidMovies = {
             new AndroidMovie ("Frozen","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Frozen","4.0","April 2012"),
             new AndroidMovie ("Kunfu Panda","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Kunfu Panda","3.5","May 2012"),
@@ -79,16 +79,17 @@ public class PopularMoviesActivityFragment extends Fragment {
         this.updateMovies();
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         //movieAdapter = new AndroidMovieAdapter(getActivity(), new ArrayList<AndroidMovie>());
         rootView = inflater.inflate(R.layout.fragment_popular_movies,container,false);
+
         //gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
 
         /**
          *
-
 
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -159,9 +160,12 @@ public class PopularMoviesActivityFragment extends Fragment {
         @Override
         protected AndroidMovie[] doInBackground(String... params) {
 
+            /**
+             *
             if(params.length ==0){
                 return null;
             }
+             */
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -172,11 +176,16 @@ public class PopularMoviesActivityFragment extends Fragment {
                 //Construct the URL for the Popular Movies query
                 //Possible parameters are available at https://www.themoviedb.org/documentation/api/discover
 
+
                 final String MOVIES_BASE_URL ="http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc";
                 final String APIKEY_PARAM = "api_key";
+                final String API_PAGE = "page";
+
                 Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
+                        .appendQueryParameter(API_PAGE, "1")
                         .appendQueryParameter(APIKEY_PARAM, BuildConfig.OPEN_POPULAR_MOVIES_API_KEY)
                         .build();
+
                 URL url = new URL(builtUri.toString());
 
                 //Create the request to themoviedb, and open the connection
@@ -191,8 +200,9 @@ public class PopularMoviesActivityFragment extends Fragment {
                     // Nothing to do.
                     movieJsonStr = null;
 
+                }else{
+                    reader = new BufferedReader(new InputStreamReader(inputStream));
                 }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -204,12 +214,12 @@ public class PopularMoviesActivityFragment extends Fragment {
                 if (buffer.length() == 0) {
                     // Stream was empty.  No point in parsing.
                     movieJsonStr = null;
-                    //return null;
                 }
                 movieJsonStr = buffer.toString();
 
                 Log.v(LOG_TAG, "Movie string: " + movieJsonStr);
-
+                /**
+                 *
 
             } catch (IOException e) {
                 Log.e("PopularMoviesFragment","Error",e);
@@ -238,6 +248,21 @@ public class PopularMoviesActivityFragment extends Fragment {
                  //This will only happen if there was an error getting or parsing the movies.
 
             return null;
+            */
+            } catch (MalformedURLException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } catch (NetworkOnMainThreadException e) {
+                Log.d("Error: ", e.toString());
+            }
+
+            try {
+                return getMovieDataFromJson(movieJsonStr);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
         @Override
@@ -245,9 +270,8 @@ public class PopularMoviesActivityFragment extends Fragment {
 
             if (result!=null){
                 try {
-                    //Toast.makeText(getContext(),"Ponemos" + Arrays.asList(result),Toast.LENGTH_LONG).show();
                     movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(result));
-                    GridView gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
+                    gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
                     gridView.setAdapter(movieAdapter);
 
 

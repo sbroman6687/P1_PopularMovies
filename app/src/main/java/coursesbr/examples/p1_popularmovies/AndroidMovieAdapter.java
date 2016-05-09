@@ -18,7 +18,6 @@ import java.util.List;
  */
 public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
     private static final String LOG_TAG = AndroidMovieAdapter.class.getSimpleName();
-
     /**
      * This is my own custom constructor (it doesn't mirror a superclass constructor)
      * The context (current context) is used to inflate the layout file, and the list (androidMovies)
@@ -35,6 +34,13 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
      * parent: The parent ViewGroup that is used for inflation
      * return: The View for the position in the AdapterView
      */
+    /**
+     *
+    @Override
+       public int getCount() {
+        return super.getCount();
+    }*/
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //1. Gets the AndroidMovie object from the ArrayAdapter at the appropriate position
@@ -48,6 +54,7 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_movie,parent,false);
         }
         ImageView posterView = (ImageView)convertView.findViewById(R.id.movieView);
+        //Picasso.with(getContext()).setLoggingEnabled(true);
         Picasso.with(getContext()).load(result.image_url).into(posterView);
 
         return convertView;
