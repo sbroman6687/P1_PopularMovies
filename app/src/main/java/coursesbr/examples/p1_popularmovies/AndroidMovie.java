@@ -10,12 +10,14 @@ public class AndroidMovie {
     String synopsis;
     String userRating;
     String releaseDate;
+    String backdrop_url;
 
-    public AndroidMovie(String oTitle, String imageUrl, String sypno,String uRating,String rDate){
+    public AndroidMovie(String oTitle, String imageUrl, String sypno,String uRating,String rDate, String backdropUrl){
         this.originalTitle=oTitle;
         this.image_url=imageUrl;
         this.synopsis=sypno;
         this.userRating=uRating;
         this.releaseDate=rDate;
+        this.backdrop_url=backdropUrl;
     }
 }

@@ -8,6 +8,8 @@
         android:layout_height="match_parent"
         android:id="@+id/movieView"
         android:src="@drawable/m1"
+        android:scaleType="fitStart"
+        android:adjustViewBounds="true"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"/>
 

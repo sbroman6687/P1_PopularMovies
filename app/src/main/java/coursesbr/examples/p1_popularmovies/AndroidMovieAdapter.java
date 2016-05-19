@@ -34,17 +34,10 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
      * parent: The parent ViewGroup that is used for inflation
      * return: The View for the position in the AdapterView
      */
-    /**
-     *
-    @Override
-       public int getCount() {
-        return super.getCount();
-    }*/
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //1. Gets the AndroidMovie object from the ArrayAdapter at the appropriate position
-        //AndroidMovie androidMovie = getItem(position);
         AndroidMovie result = getItem(position);
 
         //2. Adapters recycle views to AdapterViews. If this is a new View Object, then inflate the layout.
@@ -56,7 +49,6 @@ public class AndroidMovieAdapter extends ArrayAdapter<AndroidMovie> {
         ImageView posterView = (ImageView)convertView.findViewById(R.id.movieView);
         //Picasso.with(getContext()).setLoggingEnabled(true);
         Picasso.with(getContext()).load(result.image_url).into(posterView);
-
         return convertView;
     }
 }

@@ -18,7 +18,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,23 +47,8 @@ public class PopularMoviesActivityFragment extends Fragment {
     public AndroidMovieAdapter movieAdapter;
     public GridView gridView;
     public View rootView;
+    public String sortValue;
 
-    /**
-     *
-    AndroidMovie[] androidMovies = {
-            new AndroidMovie ("Frozen","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Frozen","4.0","April 2012"),
-            new AndroidMovie ("Kunfu Panda","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Kunfu Panda","3.5","May 2012"),
-            new AndroidMovie ("Immigrant","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Immigrant","4.2","June 2013"),
-            new AndroidMovie ("Lion King","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Lion King","5.0","December 1995"),
-            new AndroidMovie ("Monkey Kingdom","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Monkey Kingdom","3.0","September 2010"),
-            new AndroidMovie ("Peter Pan","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Peter Pan","4.3","July 1999"),
-            new AndroidMovie ("Aladdin","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Aladdin","4.7","November 2000"),
-            new AndroidMovie ("Toy Story","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Toy Story","3.8","August 2001"),
-            new AndroidMovie ("The Jungle Book","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis The Jungle Book","4.6","January 2003"),
-            new AndroidMovie ("Finding Dori","http://image.tmdb.org/t/p/w185/5N20rQURev5CNDcMjHVUZhpoCNC.jpg","Sypnosis Finding Dori","4.5","June 2014"),
-
-    };
-    */
 
     public PopularMoviesActivityFragment() {
     }
@@ -68,9 +56,15 @@ public class PopularMoviesActivityFragment extends Fragment {
     private void updateMovies(){
         FetchMoviesTask moviesTask = new FetchMoviesTask();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String popular = prefs.getString(getString(R.string.pref_movies_sort_key), getString(R.string.pref_sort_mostpopular));
-        moviesTask.execute(popular);
-        //moviesTask.execute();
+        String sortType = prefs.getString(getString(R.string.pref_movies_sort_key), getString(R.string.pref_sort_value_popular));
+
+        if (sortType.equals(getString(R.string.pref_sort_value_popular))){
+            sortValue = "popularity.desc";
+
+        }else{
+            sortValue = "vote_average.desc";
+        }
+        moviesTask.execute(sortType);
     }
 
     @Override
@@ -79,45 +73,19 @@ public class PopularMoviesActivityFragment extends Fragment {
         this.updateMovies();
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //movieAdapter = new AndroidMovieAdapter(getActivity(), new ArrayList<AndroidMovie>());
+
         rootView = inflater.inflate(R.layout.fragment_popular_movies,container,false);
 
-        //gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
-
-        /**
-         *
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Context context = getActivity();
-
-                AndroidMovie androidmovie= movieAdapter.getItem(position);
-
-                String detailtitle = androidmovie.originalTitle;
-                String detailimage = androidmovie.image_url;
-                String detailsypnosis = androidmovie.synopsis;
-                String detailRating = androidmovie.userRating;
-                String detailrelease = androidmovie.releaseDate;
-
-                // Intent to pass data between fragments using the same structure that we used in the Sunshine App
-                Intent intent = new Intent(getActivity(),MovieDetailActivity.class).putExtra("Title",detailtitle).putExtra("Sypnosis",detailsypnosis)
-                        .putExtra("Rating",detailRating).putExtra("Release",detailrelease).putExtra("Image",detailimage);
-                startActivity(intent);
-
-            }
-        });
-         */
 
         return rootView;
     }
     public class FetchMoviesTask extends AsyncTask<String,Void,AndroidMovie[]>{
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
+
 
         private AndroidMovie[] getMovieDataFromJson(String movieJsonStr)throws JSONException{
             //These are the names of the JSON object that need to be extracted
@@ -127,6 +95,7 @@ public class PopularMoviesActivityFragment extends Fragment {
             final String SYPNOSIS = "overview";
             final String MOVIE_RELEASE = "release_date";
             final String MOVIE_RATING = "vote_average";
+            final String BACKDROP = "backdrop_path";
 
             JSONObject movieJson = new JSONObject(movieJsonStr);
             JSONArray movieArray = movieJson.getJSONArray(RESULTS);
@@ -142,15 +111,17 @@ public class PopularMoviesActivityFragment extends Fragment {
                 String sypnosis;
                 String movie_release;
                 String movie_rating;
+                String movie_backdrop;
 
                 JSONObject moviedata = movieArray.getJSONObject(i);
-                img_path=" http://image.tmdb.org/t/p/w185/" + moviedata.getString(POSTER_PATH);
+                img_path="http://image.tmdb.org/t/p/w500/" + moviedata.getString(POSTER_PATH);
                 title=moviedata.getString(ORIGINAL_TITLE);
                 sypnosis = moviedata.getString(SYPNOSIS);
                 movie_release=moviedata.getString(MOVIE_RELEASE);
                 movie_rating=moviedata.getString(MOVIE_RATING);
+                movie_backdrop= "http://image.tmdb.org/t/p/w780/" + moviedata.getString(BACKDROP);
 
-                AndroidMovie element = new AndroidMovie(title,img_path,sypnosis,movie_release,movie_rating);
+                AndroidMovie element = new AndroidMovie(title,img_path,sypnosis,movie_release,movie_rating,movie_backdrop);
 
                 resultStr[i]= element;
             }
@@ -160,12 +131,6 @@ public class PopularMoviesActivityFragment extends Fragment {
         @Override
         protected AndroidMovie[] doInBackground(String... params) {
 
-            /**
-             *
-            if(params.length ==0){
-                return null;
-            }
-             */
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -177,12 +142,15 @@ public class PopularMoviesActivityFragment extends Fragment {
                 //Possible parameters are available at https://www.themoviedb.org/documentation/api/discover
 
 
-                final String MOVIES_BASE_URL ="http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc";
+                final String MOVIES_BASE_URL ="http://api.themoviedb.org/3/discover/movie/";
+                final String SORT_PARAM = sortValue;
+                final String SORT_BY = "sort_by";
                 final String APIKEY_PARAM = "api_key";
                 final String API_PAGE = "page";
 
                 Uri builtUri = Uri.parse(MOVIES_BASE_URL).buildUpon()
                         .appendQueryParameter(API_PAGE, "1")
+                        .appendQueryParameter(SORT_BY,sortValue)
                         .appendQueryParameter(APIKEY_PARAM, BuildConfig.OPEN_POPULAR_MOVIES_API_KEY)
                         .build();
 
@@ -197,7 +165,6 @@ public class PopularMoviesActivityFragment extends Fragment {
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
-                    // Nothing to do.
                     movieJsonStr = null;
 
                 }else{
@@ -218,37 +185,7 @@ public class PopularMoviesActivityFragment extends Fragment {
                 movieJsonStr = buffer.toString();
 
                 Log.v(LOG_TAG, "Movie string: " + movieJsonStr);
-                /**
-                 *
 
-            } catch (IOException e) {
-                Log.e("PopularMoviesFragment","Error",e);
-                //If the code didn't succesfully get the movies data, there is no point to parse it
-                //movieJsonStr = null;
-                return null;
-            }finally {
-                if (urlConnection!=null){
-                    urlConnection.disconnect();
-                }
-                if (reader!=null){
-                    try{
-                        reader.close();
-                    }catch (final IOException e){
-                        Log.e("PopularMoviesFragment","Error closing stream",e);
-                    }
-                }
-            }
-
-            try{
-                return getMovieDataFromJson(movieJsonStr);
-            }catch (JSONException e){
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-                 //This will only happen if there was an error getting or parsing the movies.
-
-            return null;
-            */
             } catch (MalformedURLException e1) {
                 e1.printStackTrace();
             } catch (IOException e1) {
@@ -273,6 +210,30 @@ public class PopularMoviesActivityFragment extends Fragment {
                     movieAdapter = new AndroidMovieAdapter(getActivity(), Arrays.asList(result));
                     gridView = (GridView)rootView.findViewById(R.id.gridView_popularmovies);
                     gridView.setAdapter(movieAdapter);
+                    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            Context context = getActivity();
+
+                            //AndroidMovie androidmovie = movieAdapter.getItem(position);
+                            AndroidMovie result = movieAdapter.getItem(position);
+
+                            String detailtitle = result.originalTitle;
+                            String detailimage = result.image_url;
+                            String detailsypnosis = result.synopsis;
+                            String detailRating = result.userRating;
+                            String detailrelease = result.releaseDate;
+                            String detailBackdrop = result.backdrop_url;
+
+                            // Intent to pass data between fragments using the same structure that we used in the Sunshine App
+                            Intent intent = new Intent(getActivity(), MovieDetailActivity.class).putExtra("Title", detailtitle).putExtra("Sypnosis", detailsypnosis)
+                                    .putExtra("Rating", detailRating).putExtra("Release", detailrelease).putExtra("Image", detailimage).putExtra("Backdrop", detailBackdrop);
+                            startActivity(intent);
+
+                        }
+                    });
 
 
                 }catch(NullPointerException e){
